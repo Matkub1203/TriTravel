@@ -1,0 +1,13 @@
+{
+  "app_title": "TriTravel",
+  "menu_language": "Select Language",
+  "menu_home": "Home",
+  "menu_about": "About",
+  "menu_attractions": "Attractions",
+  "home_welcome": "Welcome to TriTravel",
+  "home_description": "Explore the best attractions around the world.",
+  "see_attractions": "See Attractions",
+  "attractions_title": "Attractions",
+  "about_title": "About Us",
+  "about_text": "TriTravel is your guide to discovering the best places."
+}

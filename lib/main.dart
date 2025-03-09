@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/l10n.dart';  // Zaimportuj klasę L10n
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n.dart';  // Zaimportuj wygenerowane pliki lokalizacji
+import 'attractions_page.dart';
+import 'attraction.dart';
+import 'attractions_list.dart';
 
 void main() {
   runApp(TriTravelApp());
@@ -12,29 +15,14 @@ class TriTravelApp extends StatefulWidget {
 }
 
 class _TriTravelAppState extends State<TriTravelApp> {
-  String _languageCode = 'en'; // Domyślny język to angielski
-  int _selectedIndex = 0; // Indeks wybranego widoku
-
-  void _onLanguageChange(String newLanguageCode) {
-    setState(() {
-      _languageCode = newLanguageCode;
-    });
-  }
-
-  void _onTabChanged(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  int _selectedIndex = 0;
+  String _languageCode = 'en';
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'TriTravel',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      locale: Locale(_languageCode),  // Ustawiamy język na podstawie _languageCode
       supportedLocales: [
         Locale('en', 'US'),
         Locale('pl', 'PL'),
@@ -42,14 +30,30 @@ class _TriTravelAppState extends State<TriTravelApp> {
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
+        L10nDelegate(),  // Używamy naszej klasy delegata dla L10n
       ],
-      locale: Locale(_languageCode),  // Zmieniamy lokalizację na dynamiczną
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
       home: HomePage(
-        onLanguageChange: _onLanguageChange,
+        onLanguageChange: _changeLanguage,
         onTabChanged: _onTabChanged,
         selectedIndex: _selectedIndex,
+        attractions: attractions,
       ),
     );
+  }
+
+  void _changeLanguage(String languageCode) {
+    setState(() {
+      _languageCode = languageCode;  // Zmieniamy język
+    });
+  }
+
+  void _onTabChanged(int index) {
+    setState(() {
+      _selectedIndex = index;  // Zmieniamy wybrany ekran
+    });
   }
 }
 
@@ -57,14 +61,20 @@ class HomePage extends StatelessWidget {
   final Function(String) onLanguageChange;
   final Function(int) onTabChanged;
   final int selectedIndex;
+  final List<Attraction> attractions;
 
-  HomePage({required this.onLanguageChange, required this.onTabChanged, required this.selectedIndex});
+  HomePage({
+    required this.onLanguageChange,
+    required this.onTabChanged,
+    required this.selectedIndex,
+    required this.attractions,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(L10n.getText(context, 'app_title')),
+        title: Text(L10n.of(context)?.appTitle ?? 'TriTravel'),  // Używamy L10n
         actions: [
           IconButton(
             icon: Icon(Icons.settings),
@@ -73,7 +83,7 @@ class HomePage extends StatelessWidget {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text(L10n.getText(context, 'menu_language')),
+                    title: Text(L10n.of(context)?.menuLanguage ?? 'Language'),  // Zmieniamy metodę na wygenerowaną
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -100,26 +110,17 @@ class HomePage extends StatelessWidget {
           )
         ],
       ),
-      drawer: AppDrawer(onLanguageChange: onLanguageChange),
+      drawer: AppDrawer(
+        onLanguageChange: onLanguageChange,
+        attractions: attractions,
+        onTabChanged: onTabChanged, // Przekazywanie funkcji do menu bocznego
+      ),
       body: IndexedStack(
-        index: selectedIndex,  // Wybieramy aktualny widok na podstawie indeksu
+        index: selectedIndex,
         children: [
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Dodajemy logo nad tekstem
-                Image.asset(
-                  'assets/images/logo_tritravel.jpg', // Ścieżka do logo
-                  height: 300, // Wysokość logo
-                ),
-                SizedBox(height: 20), // Przerwa między logo a tekstem
-                Text(L10n.getText(context, 'home_welcome')),
-                Text(L10n.getText(context, 'home_description')),
-              ],
-            ),
-          ),
+          MainScreen(attractions: attractions, onTabChanged: onTabChanged),
           AboutPage(),
+          AttractionsPage(attractions: attractions),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -128,11 +129,15 @@ class HomePage extends StatelessWidget {
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: L10n.getText(context, 'menu_home'),
+            label: L10n.of(context)?.menuHome ?? 'Home',  // Używamy L10n
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.info),
-            label: L10n.getText(context, 'menu_about'),
+            label: L10n.of(context)?.menuAbout ?? 'About',  // Używamy L10n
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.location_on),
+            label: L10n.of(context)?.menuAttractions ?? 'Attractions',  // Używamy L10n
           ),
         ],
       ),
@@ -142,38 +147,171 @@ class HomePage extends StatelessWidget {
 
 class AppDrawer extends StatelessWidget {
   final Function(String) onLanguageChange;
+  final List<Attraction> attractions;
+  final Function(int) onTabChanged;
 
-  AppDrawer({required this.onLanguageChange});
+  AppDrawer({
+    required this.onLanguageChange,
+    required this.attractions,
+    required this.onTabChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
-        children: [
+        children: <Widget>[
           DrawerHeader(
-            child: Text(L10n.getText(context, 'app_title'), style: TextStyle(color: Colors.white, fontSize: 24)),
+            child: Text(L10n.of(context)?.appTitle ?? 'TriTravel'),
             decoration: BoxDecoration(
               color: Colors.blue,
             ),
           ),
           ListTile(
-            title: Text(L10n.getText(context, 'menu_home')),
+            title: Text(L10n.of(context)?.menuHome ?? 'Home'),
             onTap: () {
-              Navigator.pop(context); // Zamyka Drawer
-              // Zmiana widoku na HomePage
-              (context as Element).markNeedsBuild();
+              onTabChanged(0);
+              Navigator.pop(context);
             },
           ),
           ListTile(
-            title: Text(L10n.getText(context, 'menu_about')),
+            title: Text(L10n.of(context)?.menuAbout ?? 'About'),
             onTap: () {
-              Navigator.pop(context); // Zamyka Drawer
-              // Zmiana widoku na AboutPage
-              (context as Element).markNeedsBuild();
+              onTabChanged(1);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: Text(L10n.of(context)?.menuAttractions ?? 'Attractions'),
+            onTap: () {
+              onTabChanged(2);
+              Navigator.pop(context);
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class MainScreen extends StatelessWidget {
+  final List<Attraction> attractions;
+  final Function(int) onTabChanged;
+
+  MainScreen({required this.attractions, required this.onTabChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/images/logo_tritravel.jpg',
+            height: 300,
+          ),
+          SizedBox(height: 20),
+          Text(
+            L10n.of(context)?.homeWelcome ?? 'Welcome to TriTravel!',
+            style: TextStyle(fontSize: 20),
+          ),
+          Text(
+            L10n.of(context)?.homeDescription ?? 'Explore the most beautiful places!',
+            style: TextStyle(fontSize: 16),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              onTabChanged(2); // Ustawiamy zakładkę na "atrakcje"
+            },
+            child: Text(L10n.of(context)?.seeAttractions ?? 'See Attractions'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AttractionsPage extends StatelessWidget {
+  final List<Attraction> attractions;
+
+  AttractionsPage({required this.attractions});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(L10n.of(context)?.attractionsTitle ?? 'Attractions'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: ListView.builder(
+        itemCount: attractions.length,
+        itemBuilder: (context, index) {
+          final attraction = attractions[index];
+          return Card(
+            margin: EdgeInsets.all(8),
+            child: ListTile(
+              contentPadding: EdgeInsets.all(16),
+              leading: Image.asset(
+                attraction.imageUrl,
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+              ),
+              title: Text(attraction.title),
+              subtitle: Text(attraction.description),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        AttractionDetailPage(attraction: attraction),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class AttractionDetailPage extends StatelessWidget {
+  final Attraction attraction;
+
+  AttractionDetailPage({required this.attraction});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(attraction.title),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.asset(attraction.imageUrl),
+            SizedBox(height: 16),
+            Text(
+              attraction.title,
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              attraction.description,
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -189,12 +327,12 @@ class AboutPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              L10n.getText(context, 'about_title'),
+              L10n.of(context)?.aboutTitle ?? 'About TriTravel',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
             Text(
-              L10n.getText(context, 'about_text'),
+              L10n.of(context)?.aboutText ?? 'TriTravel is an app for travel planning.',
               style: TextStyle(fontSize: 16),
             ),
           ],

@@ -1,6 +1,13 @@
 {
-  "title": "TriTravel",
-  "welcome": "Witaj w TriTravel!",
-  "about": "O nas",
-  "settings": "Ustawienia"
+  "app_title": "TriTravel",
+  "menu_language": "Język",
+  "menu_home": "Strona główna",
+  "menu_about": "O nas",
+  "menu_attractions": "Atrakcje",
+  "home_welcome": "Witamy w TriTravel!",
+  "home_description": "Odkrywaj nowe miejsca i atrakcje.",
+  "see_attractions": "Zobacz atrakcje",
+  "attractions_title": "Atrakcje",
+  "about_title": "O TriTravel",
+  "about_text": "TriTravel to twój przewodnik po najciekawszych miejscach."
 }

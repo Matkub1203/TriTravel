@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/l10n.dart'; 
+import 'package:my_app/l10n.dart';
+import 'l10n.dart'; 
 
 class AboutPage extends StatelessWidget {
   final Function(String) onLanguageChange;
