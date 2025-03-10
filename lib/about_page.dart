@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/l10n.dart';
-import 'l10n.dart'; 
+import 'l10n.dart';
 
 class AboutPage extends StatelessWidget {
   final Function(String) onLanguageChange;
@@ -9,36 +8,21 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;  // Pobieramy instancję L10n
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(L10n.getText(context, 'about_title')),
+        title: Text(l10n.aboutTitle),
         actions: [
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => onLanguageChange('pl'),  // Zmieniamy język za pomocą przekazanej funkcji
-                child: Text(
-                  'PL',
-                  style: TextStyle(
-                    color: Localizations.localeOf(context).languageCode == 'pl' ? Colors.blue : Colors.black,
-                    fontWeight: Localizations.localeOf(context).languageCode == 'pl' ? FontWeight.bold : FontWeight.normal,
-                    decoration: Localizations.localeOf(context).languageCode == 'pl' ? TextDecoration.underline : null,
-                  ),
-                ),
-              ),
-              SizedBox(width: 10),
-              GestureDetector(
-                onTap: () => onLanguageChange('en'),
-                child: Text(
-                  'ENG',
-                  style: TextStyle(
-                    color: Localizations.localeOf(context).languageCode == 'en' ? Colors.blue : Colors.black,
-                    fontWeight: Localizations.localeOf(context).languageCode == 'en' ? FontWeight.bold : FontWeight.normal,
-                    decoration: Localizations.localeOf(context).languageCode == 'en' ? TextDecoration.underline : null,
-                  ),
-                ),
-              ),
-            ],
+          Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: Row(
+              children: [
+                _languageButton(context, 'pl'),
+                SizedBox(width: 10),
+                _languageButton(context, 'en'),
+              ],
+            ),
           ),
         ],
       ),
@@ -49,15 +33,30 @@ class AboutPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              L10n.getText(context, 'about_title'),
+              l10n.aboutTitle,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
             Text(
-              L10n.getText(context, 'about_text'),
+              l10n.aboutText,
               style: TextStyle(fontSize: 16),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _languageButton(BuildContext context, String languageCode) {
+    bool isSelected = Localizations.localeOf(context).languageCode == languageCode;
+    return GestureDetector(
+      onTap: () => onLanguageChange(languageCode),
+      child: Text(
+        languageCode.toUpperCase(),
+        style: TextStyle(
+          color: isSelected ? Colors.blue : Colors.black,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          decoration: isSelected ? TextDecoration.underline : null,
         ),
       ),
     );
@@ -71,31 +70,33 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
+            decoration: BoxDecoration(color: Colors.blue),
             child: Text('TriTravel', style: TextStyle(color: Colors.white, fontSize: 24)),
-            decoration: BoxDecoration(
-              color: Colors.blue,
-            ),
           ),
           ListTile(
-            title: Text(L10n.getText(context, 'menu_home')),
+            title: Text(l10n.menuHome),
             onTap: () {
-              // Używamy Navigator.pop(), aby wrócić do strony głównej
-              Navigator.pop(context); // Zamyka Drawer
-              Navigator.popUntil(context, ModalRoute.withName('/')); // Powrót do głównej strony
+              Navigator.pop(context);
+              Navigator.popUntil(context, ModalRoute.withName('/'));
             },
           ),
           ListTile(
-            title: Text(L10n.getText(context, 'menu_about')),
+            title: Text(l10n.menuAbout),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AboutPage(onLanguageChange: onLanguageChange)),
-              );
+              if (ModalRoute.of(context)?.settings.name != '/about') {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AboutPage(onLanguageChange: onLanguageChange)),
+                );
+              }
             },
           ),
         ],

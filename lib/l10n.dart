@@ -43,7 +43,7 @@ class L10n {
     if (locale.languageCode == 'en') {
       return 'About';
     } else if (locale.languageCode == 'pl') {
-      return 'O aplikacji';
+      return 'O nas';
     }
     return 'About';
   }
@@ -95,20 +95,40 @@ class L10n {
 
   String get aboutTitle {
     if (locale.languageCode == 'en') {
-      return 'About the App';
+      return 'About Us';
     } else if (locale.languageCode == 'pl') {
-      return 'O aplikacji';
+      return 'O nas';
     }
-    return 'About the App';
+    return 'About Us';
   }
 
   String get aboutText {
     if (locale.languageCode == 'en') {
-      return 'TriTravel is an app for planning trips.';
+      return 'We are a group of students from III High School in Gdynia who love the Tri-City area but also notice opportunities for improvement and facilitation of tourists stays, residents lives, as well as the promotion of the tourist, cultural, social, and historical values of the agglomeration. The Junior Biznes Teen 8 competition turned out to be a perfect opportunity to combine our IT, language, management, creativity, and innovation skills to create something exceptional with a group of friends.';
     } else if (locale.languageCode == 'pl') {
-      return 'TriTravel to aplikacja do planowania podróży.';
+      return 'Jesteśmy grupą uczniów z III LO w Gdyni, którzy kochają Trójmiasto, ale też zauważają możliwości poprawy i ułatwienia pobytu turystów, życia mieszkańców oraz popularyzacji walorów turystycznych, kulturowych, społecznych i historycznych aglomeracji. Konkurs Junior Biznes Teen 8 okazał się doskonałą okazją do połączenia naszych zdolności informatycznych, językowych, zarządzania, kreatywności i innowacyjności do stworzenia w grupie przyjaciół czegoś wyjątkowego.';
     }
-    return 'TriTravel is an app for planning trips.';
+    return 'We are a group of students from III High School in Gdynia who love the Tri-City area but also notice opportunities for improvement and facilitation of tourists stays, residents lives, as well as the promotion of the tourist, cultural, social, and historical values of the agglomeration. The Junior Biznes Teen 8 competition turned out to be a perfect opportunity to combine our IT, language, management, creativity, and innovation skills to create something exceptional with a group of friends.';
+  }
+  
+  static Map<String, Map<String, String>> hashtags = {
+    'en': {
+      'All': 'All',
+      'Museum': 'Museum',
+      'Science': 'Science',
+      'Culture': 'Culture',
+    },
+    'pl': {
+      'All': 'Wszystko',
+      'Museum': 'Muzea',
+      'Science': 'Science',
+      'Culture': 'Kultura',
+    },
+  };
+
+  // Funkcja do pobierania przetłumaczonego hashtaga
+  static String getHashtag(String hashtag, String languageCode) {
+    return hashtags[languageCode]?[hashtag] ?? hashtag;
   }
 }
 
